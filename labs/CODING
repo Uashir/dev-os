@@ -13,7 +13,8 @@ We have the following conventions in our code:
 * Space before braces.
   For example, if (x) { not if (x){.
 
-* Function names are all lower-case separated by underscores.
+* Function names are all lower-case, words are separated by underscores.
+  For example, read_line, not ReadLine.
 
 * Beginning-of-line indentation via tabs, not spaces.
 
