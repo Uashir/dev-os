@@ -54,18 +54,18 @@ GCCPREFIX := $(shell if i386-jos-elf-objdump -i 2>&1 | grep '^elf32-i386$$' >/de
 endif
 
 # try to infer the correct QEMU
-ifndef QEMU
-QEMU := $(shell if which qemu > /dev/null; \
-	then echo qemu; exit; \
-	else \
-	qemu=/Applications/Q.app/Contents/MacOS/i386-softmmu.app/Contents/MacOS/i386-softmmu; \
-	if test -x $$qemu; then echo $$qemu; exit; fi; fi; \
-	echo "***" 1>&2; \
-	echo "*** Error: Couldn't find a working QEMU executable." 1>&2; \
-	echo "*** Is the directory containing the qemu binary in your PATH" 1>&2; \
-	echo "*** or have you tried setting the QEMU variable in conf/env.mk?" 1>&2; \
-	echo "***" 1>&2; exit 1)
-endif
+# ifndef QEMU
+# QEMU := $(shell if which qemu > /dev/null; \
+# 	then echo qemu; exit; \
+# 	else \
+# 	qemu=/Applications/Q.app/Contents/MacOS/i386-softmmu.app/Contents/MacOS/i386-softmmu; \
+# 	if test -x $$qemu; then echo $$qemu; exit; fi; fi; \
+# 	echo "***" 1>&2; \
+# 	echo "*** Error: Couldn't find a working QEMU executable." 1>&2; \
+# 	echo "*** Is the directory containing the qemu binary in your PATH" 1>&2; \
+# 	echo "*** or have you tried setting the QEMU variable in conf/env.mk?" 1>&2; \
+# 	echo "***" 1>&2; exit 1)
+# endif
 
 # try to generate a unique GDB port
 GDBPORT	:= $(shell expr `id -u` % 5000 + 25000)
@@ -86,7 +86,7 @@ PERL	:= perl
 # Compiler flags
 # -fno-builtin is required to avoid refs to undefined functions in the kernel.
 # Only optimize to -O1 to discourage inlining, which complicates backtraces.
-CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -O1 -fno-builtin -I$(TOP) -MD 
+CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -O1 -fno-builtin -I$(TOP) -MD
 CFLAGS += -Wall -Wno-format -Wno-unused -Werror -gstabs -m32
 
 # Add -fno-stack-protector if the option exists.
