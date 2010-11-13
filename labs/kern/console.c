@@ -45,7 +45,7 @@ delay(void)
 #define   COM_LSR_TXRDY	0x20	//   Transmit buffer avail
 #define   COM_LSR_TSRE	0x40	//   Transmitter off
 
-static bool serial_exists;
+static int serial_exists;
 
 static int
 serial_proc_data(void)
