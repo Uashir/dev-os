@@ -3,16 +3,16 @@
 #include <inc/mmu.h>
 #include <inc/memlayout.h>
 
-# Shift Right Logical
+# Shift Right Logical 
 #define SRL(val, shamt)		(((val) >> (shamt)) & ~(-1 << (32 - (shamt))))
 
 
 ###################################################################
-# The kernel (this code) is linked at address ~(KERNBASE + 1 Meg),
+# The kernel (this code) is linked at address ~(KERNBASE + 1 Meg), 
 # but the bootloader loads it at address ~1 Meg.
-#
+#	
 # RELOC(x) maps a symbol x from its link address to its actual
-# location in physical memory (its load address).
+# location in physical memory (its load address).	 
 ###################################################################
 
 #define	RELOC(x) ((x) - KERNBASE)
@@ -55,9 +55,12 @@ _start:
 	ljmp	$CODE_SEL,$relocated		# reload CS by jumping
 relocated:
 
-	# We are gonna make first call soon.
-	# Maybe it is time to put NULL to some register before making the first call?
-	# Set the stack pointer
+	# Clear the frame pointer register (EBP)
+	# so that once we get into debugging C code,
+	# stack backtraces will be terminated properly.
+	movl	$0x0,%ebp			# nuke frame pointer
+
+        # Set the stack pointer
 	movl	$(bootstacktop),%esp
 
 	# now to C code
@@ -67,7 +70,7 @@ relocated:
 spin:	jmp	spin
 
 
-###################################################################
+###################################################################	
 # See <inc/memlayout.h> for a complete description of these two symbols.
 ###################################################################
 .data
@@ -84,11 +87,11 @@ spin:	jmp	spin
 	.globl		bootstack
 bootstack:
 	.space		KSTKSIZE
-	.globl		bootstacktop
+	.globl		bootstacktop   
 bootstacktop:
 
 ###################################################################
-# setup the GDT
+# setup the GDT	
 ###################################################################
 	.p2align	2		# force 4 byte alignment
 mygdt:
