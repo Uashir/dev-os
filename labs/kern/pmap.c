@@ -248,7 +248,7 @@ i386_vm_init(void)
 	// segmentation.
 
 	// Map VA 0:4MB same as VA KERNBASE, i.e. to PA 0:4MB.
-	// (Limits our kernel to <4MB)
+	// (Limits our kernel to <3MB)
 	pgdir[0] = pgdir[PDX(KERNBASE)];
 
 	// Install page table.
