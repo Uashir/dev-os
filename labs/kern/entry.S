@@ -55,16 +55,13 @@ _start:
     ljmp    $CODE_SEL,$relocated   # reload CS by jumping
 relocated:
 
-    # Clear the frame pointer register (EBP)
-    # so that once we get into debugging C code,
-    # stack backtraces will be terminated properly.
-    movl    $0x0,%ebp              # nuke frame pointer
+	# We are gonna make first call soon.
+	# Maybe it is time to put NULL to some register before making the first call?
+	# Set the stack pointer
+	movl	$(bootstacktop),%esp
 
-        # Set the stack pointer
-    movl    $(bootstacktop),%esp
-
-    # now to C code
-    call    i386_init
+	# now to C code
+	call	i386_init
 
     # Should never get here, but in case we do, just spin.
 spin:    jmp    spin
