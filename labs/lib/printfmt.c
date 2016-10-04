@@ -35,7 +35,7 @@ static const char * const error_string[MAXERROR + 1] =
  */
 static void
 printnum(void (*putch)(int, void*), void *putdat,
-	 unsigned long long num, unsigned base, int width, int padc)
+	 unsigned long num, unsigned long base, int width, int padc)
 {
 	// first recursively print all preceding (more significant) digits
 	if (num >= base) {

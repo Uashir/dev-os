@@ -3,23 +3,23 @@
 #include <inc/mmu.h>
 #include <inc/memlayout.h>
 
-# Shift Right Logical
-#define SRL(val, shamt)		(((val) >> (shamt)) & ~(-1 << (32 - (shamt))))
+# Shift Right Logical 
+#define SRL(val, shamt) (((val) >> (shamt)) & ~(-1 << (32 - (shamt))))
 
 
 ###################################################################
-# The kernel (this code) is linked at address ~(KERNBASE + 1 Meg),
+# The kernel (this code) is linked at address ~(KERNBASE + 1 Meg), 
 # but the bootloader loads it at address ~1 Meg.
 #
 # RELOC(x) maps a symbol x from its link address to its actual
 # location in physical memory (its load address).
 ###################################################################
 
-#define	RELOC(x) ((x) - KERNBASE)
+#define RELOC(x) ((x) - KERNBASE)
 
 
-.set CODE_SEL,0x8		# index of code seg within mygdt
-.set DATA_SEL,0x10		# index of data seg within mygdt
+.set CODE_SEL,0x8        # index of code seg within mygdt
+.set DATA_SEL,0x10       # index of data seg within mygdt
 
 #define MULTIBOOT_PAGE_ALIGN  (1<<0)
 #define MULTIBOOT_MEMORY_INFO (1<<1)
@@ -39,20 +39,20 @@
 .long MULTIBOOT_HEADER_FLAGS
 .long CHECKSUM
 
-.globl		_start
+.globl _start
 _start:
-	movw	$0x1234,0x472			# warm boot
+    movw    $0x1234,0x472          # warm boot
 
-	# Establish our own GDT in place of the boot loader's temporary GDT.
-	lgdt	RELOC(mygdtdesc)		# load descriptor table
+    # Establish our own GDT in place of the boot loader's temporary GDT.
+    lgdt    RELOC(mygdtdesc)       # load descriptor table
 
-	# Immediately reload all segment registers (including CS!)
-	# with segment selectors from the new GDT.
-	movl	$DATA_SEL, %eax			# Data segment selector
-	movw	%ax,%ds				# -> DS: Data Segment
-	movw	%ax,%es				# -> ES: Extra Segment
-	movw	%ax,%ss				# -> SS: Stack Segment
-	ljmp	$CODE_SEL,$relocated		# reload CS by jumping
+    # Immediately reload all segment registers (including CS!)
+    # with segment selectors from the new GDT.
+    movl    $DATA_SEL, %eax        # Data segment selector
+    movw    %ax,%ds                # -> DS: Data Segment
+    movw    %ax,%es                # -> ES: Extra Segment
+    movw    %ax,%ss                # -> SS: Stack Segment
+    ljmp    $CODE_SEL,$relocated   # reload CS by jumping
 relocated:
 
 	# We are gonna make first call soon.
@@ -64,39 +64,38 @@ relocated:
 	# now to C code
 	call	i386_init
 
-	# Should never get here, but in case we do, just spin.
-spin:	jmp	spin
+    # Should never get here, but in case we do, just spin.
+spin:    jmp    spin
 
 
 ###################################################################
 # See <inc/memlayout.h> for a complete description of these two symbols.
 ###################################################################
 .data
-	.globl	vpt
-	.set	vpt, VPT
-	.globl	vpd
-	.set	vpd, (VPT + SRL(VPT, 10))
+    .globl  vpt
+    .set    vpt, VPT
+    .globl  vpd
+    .set    vpd, (VPT + SRL(VPT, 10))
 
 
 ###################################################################
 # boot stack
 ###################################################################
-	.p2align	PGSHIFT		# force page alignment
-	.globl		bootstack
+    .p2align PGSHIFT # force page alignment
+    .globl  bootstack
 bootstack:
-	.space		KSTKSIZE
-	.globl		bootstacktop
+    .space  KSTKSIZE
+    .globl  bootstacktop   
 bootstacktop:
 
 ###################################################################
 # setup the GDT
 ###################################################################
-	.p2align	2		# force 4 byte alignment
+    .p2align 2 # force 4 byte alignment
 mygdt:
-	SEG_NULL				# null seg
-	SEG(STA_X|STA_R, -KERNBASE, 0xffffffff)	# code seg
-	SEG(STA_W, -KERNBASE, 0xffffffff)	# data seg
+    SEG_NULL   # null seg
+    SEG(STA_X|STA_R, -KERNBASE, 0xffffffff) # code seg
+    SEG(STA_W, -KERNBASE, 0xffffffff)       # data seg
 mygdtdesc:
-	.word	0x17			# sizeof(mygdt) - 1
-	.long	RELOC(mygdt)		# address mygdt
-
+    .word    0x17            # sizeof(mygdt) - 1
+    .long    RELOC(mygdt)    # address mygdt
