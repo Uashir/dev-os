@@ -118,9 +118,14 @@ boot_alloc(uint32_t n, uint32_t align)
 
 	// LAB 2: Your code here:
 	//	Step 1: round boot_freemem up to be aligned properly
+    boot_freemem = ROUNDUP(boot_freemem, align);
 	//	Step 2: save current value of boot_freemem as allocated chunk
+	v = boot_freemem;
 	//	Step 3: increase boot_freemem to record allocation
+	boot_freemem += n;
 	//	Step 4: return allocated chunk
+	return v;
+
 
 	return NULL;
 }
