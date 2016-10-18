@@ -125,9 +125,7 @@ boot_alloc(uint32_t n, uint32_t align)
 	boot_freemem += n;
 	//	Step 4: return allocated chunk
 	return v;
-
-
-	return NULL;
+//	return NULL;
 }
 
 // Set up a two-level page table:
@@ -150,7 +148,7 @@ i386_vm_init(void)
 	size_t n;
 
 	// Delete this line:
-	panic("i386_vm_init: This function is not finished\n");
+//	panic("i386_vm_init: This function is not finished\n");
 
 	//////////////////////////////////////////////////////////////////////
 	// create initial page directory.
@@ -178,7 +176,8 @@ i386_vm_init(void)
 	// 'npage' equals the number of physical pages in memory.  User-level
 	// programs will get read-only access to the array as well.
 	// You must allocate the array yourself.
-	// Your code goes here: 
+	// Your code goes here:
+    pages = boot_alloc(npage * sizeof(struct Page), PGSIZE);
 
 
 	//////////////////////////////////////////////////////////////////////
