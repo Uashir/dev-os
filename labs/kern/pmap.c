@@ -187,7 +187,7 @@ i386_vm_init(void)
 	// particular, we can now map memory using boot_map_segment or page_insert
 	page_init();
 
-        check_page_alloc();
+    check_page_alloc();
 
 	page_check();
 
@@ -436,8 +436,14 @@ page_init(void)
 	int i;
 	LIST_INIT(&page_free_list);
 	for (i = 0; i < npage; i++) {
-		pages[i].pp_ref = 0;
-		LIST_INSERT_HEAD(&page_free_list, &pages[i], pp_link);
+		if (i == 0
+                || (i >= IOPHYSMEM / PGSIZE && i < EXTPHYSMEM / PGSIZE)
+                || (i >= EXTPHYSMEM / PGSIZE && i < (unsigned int) boot_freemem / PGSIZE)) {
+			pages[i].pp_ref = 1; // mark as inuse
+		} else {
+			pages[i].pp_ref = 0;
+			LIST_INSERT_HEAD(&page_free_list, &pages[i], pp_link);
+		}
 	}
 }
 
@@ -470,7 +476,15 @@ int
 page_alloc(struct Page **pp_store)
 {
 	// Fill this function in
-	return -E_NO_MEM;
+	if (LIST_EMPTY(&page_free_list)) {
+		return -E_NO_MEM;
+	}
+
+	*pp_store = LIST_FIRST(&page_free_list);
+	LIST_REMOVE(*pp_store, pp_link);
+	page_initpp(*pp_store);
+	(*pp_store)->pp_ref = 0;
+	return 0;
 }
 
 //
@@ -481,6 +495,7 @@ void
 page_free(struct Page *pp)
 {
 	// Fill this function in
+	LIST_INSERT_HEAD(&page_free_list, pp, pp_link);
 }
 
 //
