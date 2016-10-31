@@ -130,7 +130,7 @@ boot_alloc(uint32_t n, uint32_t align)
 	//	Step 2: save current value of boot_freemem as allocated chunk
 	v = mem;
 	//	Step 3: increase boot_freemem to record allocation
-	boot_freemem += mem + n;
+	boot_freemem = mem + n;
 	//	Step 4: return allocated chunk
 	return v;
 }
