@@ -72,6 +72,11 @@ void
 env_init(void)
 {
 	// LAB 3: Your code here.
+	int i;
+	for (i = NENV - 1; i >= 0; --i) {
+		LIST_INSERT_HEAD(&env_free_list, &envs[i], env_link);
+		envs[i].env_id = 0;
+	}
 }
 
 //
@@ -112,6 +117,11 @@ env_setup_vm(struct Env *e)
 	//	pp_ref for env_free to work correctly.
 
 	// LAB 3: Your code here.
+	++p->pp_ref;
+	e->env_pgdir = page2kva(p);
+	e->env_cr3 = PADDR(e->env_pgdir);
+	memset(e->env_pgdir, 0, PGSIZE);
+	memmove(&e->env_pgdir[PDX(UTOP)], &boot_pgdir[PDX(UTOP)], PGSIZE - PDX(UTOP)*sizeof(pde_t));
 
 	// VPT and UVPT map the env's own page table, with
 	// different permissions.
@@ -190,12 +200,26 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 static void
 segment_alloc(struct Env *e, void *va, size_t len)
 {
+	va = ROUNDDOWN(va, PGSIZE);
+	len = ROUNDUP(len, PGSIZE);
 	// LAB 3: Your code here.
 	// (But only if you need it for load_icode.)
 	//
 	// Hint: It is easier to use segment_alloc if the caller can pass
 	//   'va' and 'len' values that are not page-aligned.
 	//   You should round va down, and round len up.
+	int i;
+	for (i = 0; i < len; i += PGSIZE) {
+		struct Page *p;
+
+		int r = page_alloc(&p);
+		if (r < 0)
+			panic("page_alloc failed: %e", r);
+
+		r = page_insert(e->env_pgdir, p, (void *)va + i, PTE_W | PTE_U);
+		if (r < 0)
+			panic("page_insert failed: %e", r);
+	}
 }
 
 //
@@ -258,6 +282,36 @@ load_icode(struct Env *e, uint8_t *binary, size_t size)
 	// at virtual address USTACKTOP - PGSIZE.
 
 	// LAB 3: Your code here.
+	struct Elf *elf = (struct Elf *)binary;
+	assert(elf->e_magic == ELF_MAGIC);
+
+	lcr3(e->env_cr3);
+	int i;
+	for (i = 0; i < elf->e_phnum; ++i) {
+		struct Proghdr *ph = &((struct Proghdr *)(binary + elf->e_phoff))[i];
+		if (ph->p_type != ELF_PROG_LOAD)
+			continue;
+
+		assert(ph->p_filesz <= ph->p_memsz);
+
+		segment_alloc(e, (void *)ph->p_va, ph->p_memsz);
+
+		memmove((void *)ph->p_va, binary + ph->p_offset, ph->p_filesz);
+		if (ph->p_memsz > ph->p_filesz)
+			memset((void *)(ph->p_va + ph->p_filesz), 0, ph->p_memsz - ph->p_filesz);
+	}
+	lcr3(boot_cr3);
+
+	e->env_tf.tf_eip = elf->e_entry;
+
+	struct Page *stack_page;
+	int r = page_alloc(&stack_page);
+	if (r < 0)
+		panic("page_alloc failed: %e", r);
+
+	r = page_insert(e->env_pgdir, stack_page, (void *)(USTACKTOP - PGSIZE), PTE_U | PTE_W);
+	if (r < 0)
+		panic("page_insert failed: %e");
 }
 
 //
@@ -274,6 +328,13 @@ void
 env_create(uint8_t *binary, size_t size)
 {
 	// LAB 3: Your code here.
+	struct Env *env;
+
+	int r = env_alloc(&env, 0);
+	if (r < 0)
+		panic("env_alloc failed: %e", r);
+
+	load_icode(env, binary, size);
 }
 
 //
@@ -384,6 +445,12 @@ env_run(struct Env *e)
 	
 	// LAB 3: Your code here.
 
-	panic("env_run not yet implemented");
+	e->env_runs++;
+	curenv = e;
+
+	if (rcr3() != e->env_cr3)
+		lcr3(e->env_cr3);
+
+	env_pop_tf(&e->env_tf);
 }
 
