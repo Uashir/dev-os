@@ -59,7 +59,45 @@ idt_init(void)
 	extern struct Segdesc gdt[];
 	
 	// LAB 3: Your code here.
+    extern void trap_handle_divide_error();
+    extern void trap_handle_debug_exception();
+    extern void trap_handle_non_maskable_interrupt();
+    extern void trap_handle_breakpoint();
+    extern void trap_handle_overflow();
+    extern void trap_handle_bounds_check();
+    extern void trap_handle_illegal_opcode();
+    extern void trap_handle_device_not_available();
+    extern void trap_handle_double_fault();
+    extern void trap_handle_invalid_task_switch_segment();
+    extern void trap_handle_segment_not_present();
+    extern void trap_handle_stack_exception();
+    extern void trap_handle_general_protection_fault();
+    extern void trap_handle_page_fault();
+    extern void trap_handle_floating_point_error();
+    extern void trap_handle_aligment_check();
+    extern void trap_handle_machine_check();
+    extern void trap_handle_simd_floating_point_error();
+    extern void trap_handle_system_call();
 
+    SETGATE(idt[T_DIVIDE], 0, GD_KT, trap_handle_divide_error, 0);
+    SETGATE(idt[T_DEBUG], 0, GD_KT, trap_handle_debug_exception, 0);
+    SETGATE(idt[T_NMI], 0, GD_KT, trap_handle_non_maskable_interrupt, 0);
+    SETGATE(idt[T_BRKPT], 0, GD_KT, trap_handle_breakpoint, 3);
+    SETGATE(idt[T_OFLOW], 0, GD_KT, trap_handle_overflow, 0);
+    SETGATE(idt[T_BOUND], 0, GD_KT, trap_handle_bounds_check, 0);
+    SETGATE(idt[T_ILLOP], 0, GD_KT, trap_handle_illegal_opcode, 0);
+    SETGATE(idt[T_DEVICE], 0, GD_KT, trap_handle_device_not_available, 0);
+    SETGATE(idt[T_DBLFLT], 0, GD_KT, trap_handle_double_fault, 0);
+    SETGATE(idt[T_TSS], 0, GD_KT, trap_handle_invalid_task_switch_segment, 0);
+    SETGATE(idt[T_SEGNP], 0, GD_KT, trap_handle_segment_not_present, 0);
+    SETGATE(idt[T_STACK], 0, GD_KT, trap_handle_stack_exception, 0);
+    SETGATE(idt[T_GPFLT], 0, GD_KT, trap_handle_general_protection_fault, 0);
+    SETGATE(idt[T_PGFLT], 0, GD_KT, trap_handle_page_fault, 0);
+    SETGATE(idt[T_FPERR], 0, GD_KT, trap_handle_floating_point_error, 0);
+    SETGATE(idt[T_ALIGN], 0, GD_KT, trap_handle_aligment_check, 0);
+    SETGATE(idt[T_MCHK], 0, GD_KT, trap_handle_machine_check, 0);
+    SETGATE(idt[T_SIMDERR], 0, GD_KT, trap_handle_simd_floating_point_error, 0);
+    SETGATE(idt[T_SYSCALL], 0, GD_KT, trap_handle_system_call, 3);
 	// Setup a TSS so that we get the right stack
 	// when we trap to the kernel.
 	ts.ts_esp0 = KSTACKTOP;
