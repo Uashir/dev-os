@@ -1,14 +1,11 @@
-/* See COPYRIGHT for copyright information. */
-
 #ifndef JOS_INC_ELF_H
 #define JOS_INC_ELF_H
 
-/* Строка "\x7FELF" при порядке байтов, принятом в x86 */
-#define ELF_MAGIC 0x464C457FU
+#define ELF_MAGIC 0x464C457FU	/* "\x7FELF" in little endian */
 
 struct Elf {
-	uint32_t e_magic;	// Должно совпадать с ELF_MAGIC
-	uint8_t  e_elf[12];
+	uint32_t e_magic;	// must equal ELF_MAGIC
+	uint8_t e_elf[12];
 	uint16_t e_type;
 	uint16_t e_machine;
 	uint32_t e_version;
@@ -48,21 +45,21 @@ struct Secthdr {
 	uint32_t sh_entsize;
 };
 
-// Возможные значения поля Proghdr::p_type
+// Values for Proghdr::p_type
 #define ELF_PROG_LOAD		1
 
-// Битовые флаги для поля Proghdr::p_flags
+// Flag bits for Proghdr::p_flags
 #define ELF_PROG_FLAG_EXEC	1
 #define ELF_PROG_FLAG_WRITE	2
 #define ELF_PROG_FLAG_READ	4
 
-// Возможные значения поля Secthdr::sh_type
+// Values for Secthdr::sh_type
 #define ELF_SHT_NULL		0
 #define ELF_SHT_PROGBITS	1
 #define ELF_SHT_SYMTAB		2
 #define ELF_SHT_STRTAB		3
 
-// Возможные значения поля Secthdr::sh_name
+// Values for Secthdr::sh_name
 #define ELF_SHN_UNDEF		0
 
 #endif /* !JOS_INC_ELF_H */

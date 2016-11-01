@@ -1,4 +1,3 @@
-/* See COPYRIGHT for copyright information. */
 #ifndef JOS_INC_MMU_H
 #define JOS_INC_MMU_H
 

@@ -1,5 +1,3 @@
-/* See COPYRIGHT for copyright information. */
-
 #ifndef JOS_INC_TYPES_H
 #define JOS_INC_TYPES_H
 
@@ -7,7 +5,10 @@
 #define NULL ((void*) 0)
 #endif
 
-// Целые типы с яно указанным размером (в битах).
+// Represents true-or-false values
+typedef int bool;
+
+// Explicitly-sized versions of integer types
 typedef __signed char int8_t;
 typedef unsigned char uint8_t;
 typedef short int16_t;

@@ -1,5 +1,3 @@
-/* See COPYRIGHT for copyright information. */
-
 #ifndef JOS_KBDREG_H
 #define JOS_KBDREG_H
 
