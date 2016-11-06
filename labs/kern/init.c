@@ -54,7 +54,7 @@ i386_init(void)
 //  ENV_CREATE(user_divzero);
 //	ENV_CREATE(user_softint);
 //	ENV_CREATE(user_badsegment);
-	ENV_CREATE(user_primes);
+//	ENV_CREATE(user_primes);
 #endif // TEST*
 
 
