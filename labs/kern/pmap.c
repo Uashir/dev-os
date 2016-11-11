@@ -150,7 +150,7 @@ boot_alloc(uint32_t n, uint32_t align)
 void
 i386_vm_init(void)
 {
-	pde_t* pgdir;
+	pde_t* pgdir; // указатель на дирректорию страниц
 	uint32_t cr0;
 	size_t n;
 
@@ -159,10 +159,10 @@ i386_vm_init(void)
 
 	//////////////////////////////////////////////////////////////////////
 	// create initial page directory.
-	pgdir = boot_alloc(PGSIZE, PGSIZE);
-	memset(pgdir, 0, PGSIZE);
-	boot_pgdir = pgdir;
-	boot_cr3 = PADDR(pgdir);
+	pgdir = boot_alloc(PGSIZE, PGSIZE); // выделяем память для дирректории страниц (размер 4096, смещение 4096)
+	memset(pgdir, 0, PGSIZE); // инициализация участка памяти от pgdir до pgdir + байт * 4096 нулями
+	boot_pgdir = pgdir; // виртуальный адресс дирректории страниц
+	boot_cr3 = PADDR(pgdir); // физический адресс дирректории страниц
 
 	//////////////////////////////////////////////////////////////////////
 	// Recursively insert PD in itself as a page table, to form
@@ -438,29 +438,33 @@ page_init(void)
 	//     in case we ever need them.  (Currently we don't, but...)
 	//  2) Mark the rest of base memory as free.
 	//  3) Then comes the IO hole [IOPHYSMEM, EXTPHYSMEM).
-	//     Mark it as in use so that it can never be allocated.      
+	//     Mark it as in use so that it can never be allocated.
 	//  4) Then extended memory [EXTPHYSMEM, ...).
 	//     Some of it is in use, some is free. Where is the kernel?
 	//     Which pages are used for page tables and other data structures?
 	//
 	// Change the code to reflect this.
-	int i;
-	LIST_INIT(&page_free_list);
+	int i; // итерация по страницам
+	LIST_INIT(&page_free_list); // инициализация списка свободных физических страниц
 
-	pages[0].pp_ref = 1;
-	memset(&pages[0].pp_link, 0, sizeof(pages[0].pp_link));
+	pages[0].pp_ref = 1; // помечаем, что на нулевую страницу указывает одна ссылка
+	memset(&pages[0].pp_link, 0, sizeof(pages[0].pp_link)); // инициализация области нулями
 
+	// почаем страницы ниже 0xA0000 как свободные и добавляем в список
 	for (i = 1; i < IOPHYSMEM / PGSIZE; ++i) {
 		pages[i].pp_ref = 0;
 		LIST_INSERT_HEAD(&page_free_list, &pages[i], pp_link);
 	}
 
+	// округляем значение уазателя на следующий байт свободной памяти
 	void *page_aligned_free_mem = ROUNDUP(boot_freemem, PGSIZE);
+	// все страницы, что находятся ниже его помечаем как занятые и инициализирует нулями
 	for (i = IOPHYSMEM / PGSIZE; i < PADDR(page_aligned_free_mem) / PGSIZE; ++i) {
 		pages[i].pp_ref = 1;
 		memset(&pages[i].pp_link, 0, sizeof(pages[i].pp_link));
 	}
 
+	// помечаем оставшуюся память как доступную b l
 	for (i = PADDR(page_aligned_free_mem) / PGSIZE; i < npage; ++i) {
 		pages[i].pp_ref = 0;
 		LIST_INSERT_HEAD(&page_free_list, &pages[i], pp_link);
@@ -495,13 +499,18 @@ page_initpp(struct Page *pp)
 int
 page_alloc(struct Page **pp_store)
 {
+    // если список страниц пуст, то вернем код ошибки
 	if (LIST_EMPTY(&page_free_list))
 		return -E_NO_MEM;
 
+	// получить первый элемент из списка свободных страниц
 	struct Page *p = LIST_FIRST(&page_free_list);
+	//  удаляем элемент p из списка свободных страниц
 	LIST_REMOVE(p, pp_link);
 
+	// инициализируем страницу нулями
 	page_initpp(p);
+	// указатель на новую выделенную страницу
 	*pp_store = p;
 	return 0;
 }
@@ -514,7 +523,9 @@ void
 page_free(struct Page *pp)
 {
 	// Fill this function in
+    // если счетчик ссылок на страницу ноль, то что-то пошло не так
 	assert(pp->pp_ref == 0);
+    // возвращаем дискрипток в список свбододных страниц
 	LIST_INSERT_HEAD(&page_free_list, pp, pp_link);
 }
 
@@ -550,10 +561,12 @@ page_decref(struct Page* pp)
 pte_t *
 pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
-	pde_t pde = pgdir[PDX(va)];
+	pde_t pde = pgdir[PDX(va)]; // получаем запись в дирректории страниц
+	// если страница присутствует в памяти
 	if (pde & PTE_P) {
-		physaddr_t page_table_ph = PTE_ADDR(pde);
+		physaddr_t page_table_ph = PTE_ADDR(pde); // вернет физический адресс записи
 		assert(page_table_ph);
+		// возвращает соответствующий виртуальный kernel адресс
 		pte_t *page_table = KADDR(page_table_ph);
 		assert(page_table);
 		return &page_table[PTX(va)];
@@ -561,6 +574,7 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 
 	if (!create)
 		return NULL;
+    // создаем дискриптор страицы и выделяем для него страцу памяти
 	struct Page *p;
 	if (page_alloc(&p))
 		return NULL;
@@ -568,7 +582,8 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 	p->pp_ref = 1;
 	pte_t *page_table = page2kva(p);
 	assert(page_table);
-	memset(page_table, 0, sizeof(pte_t) * NPTENTRIES);
+    // заполнить таблицу страниц нулями
+	memset(page_table, 0, sizeof(pte_t) * NPTENTRIES /* кол-во записей в page_table */);
 	pgdir[PDX(va)] = PADDR(page_table) | PTE_P | PTE_W | PTE_U;
 
 	return &page_table[PTX(va)];
@@ -604,12 +619,16 @@ page_insert(pde_t *pgdir, struct Page *pp, void *va, int perm)
 	if (!pte)
 		return -E_NO_MEM;
 
+    // увеличиваем счетчик ссылок на единицу
 	++pp->pp_ref;
 
+	// если страница уже отображена, то удаляем её
 	if (*pte & PTE_P)
 		page_remove(pgdir, va);
 
+	// установка соответсвия с физической страницей
 	*pte = page2pa(pp) | PTE_P | perm;
+	// установка флагов для записи в дирректории страниц
 	pgdir[PDX(va)] |= perm;
 	return 0;
 }
@@ -634,10 +653,11 @@ boot_map_segment(pde_t *pgdir, uintptr_t la, size_t size, physaddr_t pa, int per
 
 	int i;
 	for (i = 0; i < size / PGSIZE; ++i) {
+		// указатель на новую таблицу страницу
 		pte_t *pte = pgdir_walk(pgdir, (void *)(la + i * PGSIZE), 1);
 		if (!pte)
 			panic("can't get page");
-
+		// разыменовываем указатель и записываем физическтй адресс, установив флаги
 		*pte = (pa + i * PGSIZE) | PTE_P | perm;
 	}
 }
