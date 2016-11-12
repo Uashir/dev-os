@@ -118,9 +118,11 @@ env_setup_vm(struct Env *e)
 
 	// LAB 3: Your code here.
 	++p->pp_ref;
-	e->env_pgdir = page2kva(p);
-	e->env_cr3 = PADDR(e->env_pgdir);
-	memset(e->env_pgdir, 0, PGSIZE);
+	// сохнаряем информацию в дискрипторе
+	e->env_pgdir = page2kva(p); // виртуальный адресс дирректории страниц
+	e->env_cr3 = PADDR(e->env_pgdir); // физицеский адресс дирректории страниц
+	memset(e->env_pgdir, 0, PGSIZE); // инициализация нулями
+	// сдвигает память "источник", "получатель", "размер"
 	memmove(&e->env_pgdir[PDX(UTOP)], &boot_pgdir[PDX(UTOP)], PGSIZE - PDX(UTOP)*sizeof(pde_t));
 
 	// VPT and UVPT map the env's own page table, with
@@ -282,26 +284,33 @@ load_icode(struct Env *e, uint8_t *binary, size_t size)
 	// at virtual address USTACKTOP - PGSIZE.
 
 	// LAB 3: Your code here.
-	struct Elf *elf = (struct Elf *)binary;
-	assert(elf->e_magic == ELF_MAGIC);
+	struct Elf *elf = (struct Elf *)binary; // преобразование к elf
+	assert(elf->e_magic == ELF_MAGIC); // проверка на возможность ошибки
 
 	lcr3(e->env_cr3);
 	int i;
-	for (i = 0; i < elf->e_phnum; ++i) {
+	// e_phum - число записей в program header table
+	for (i = 0; i < elf->e_phnum; ++i) { // для каждого элемента таблицы
+		// e_phoff - program header table's offset
 		struct Proghdr *ph = &((struct Proghdr *)(binary + elf->e_phoff))[i];
+		// пропускаем, что не надо
 		if (ph->p_type != ELF_PROG_LOAD)
 			continue;
 
 		assert(ph->p_filesz <= ph->p_memsz);
 
+		// выделяет число байт для окружения e и отображает их по адрессу va
 		segment_alloc(e, (void *)ph->p_va, ph->p_memsz);
 
+		// передвинем память получаетль, источник, размер
 		memmove((void *)ph->p_va, binary + ph->p_offset, ph->p_filesz);
+        // загрузка "особенных" областей, например bss
 		if (ph->p_memsz > ph->p_filesz)
 			memset((void *)(ph->p_va + ph->p_filesz), 0, ph->p_memsz - ph->p_filesz);
 	}
 	lcr3(boot_cr3);
 
+	// установка программного счетчика
 	e->env_tf.tf_eip = elf->e_entry;
 
 	struct Page *stack_page;
@@ -451,6 +460,7 @@ env_run(struct Env *e)
 	if (rcr3() != e->env_cr3)
 		lcr3(e->env_cr3);
 
+    // встановление регистров и переход
 	env_pop_tf(&e->env_tf);
 }
 
