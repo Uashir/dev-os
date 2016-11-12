@@ -122,7 +122,7 @@ env_setup_vm(struct Env *e)
 	e->env_pgdir = page2kva(p); // виртуальный адресс дирректории страниц
 	e->env_cr3 = PADDR(e->env_pgdir); // физицеский адресс дирректории страниц
 	memset(e->env_pgdir, 0, PGSIZE); // инициализация нулями
-	// сдвигает память "источник", "получатель", "размер"
+	// перемещаем память "получатель", "источник", "размер"
 	memmove(&e->env_pgdir[PDX(UTOP)], &boot_pgdir[PDX(UTOP)], PGSIZE - PDX(UTOP)*sizeof(pde_t));
 
 	// VPT and UVPT map the env's own page table, with
@@ -302,7 +302,7 @@ load_icode(struct Env *e, uint8_t *binary, size_t size)
 		// выделяет число байт для окружения e и отображает их по адрессу va
 		segment_alloc(e, (void *)ph->p_va, ph->p_memsz);
 
-		// передвинем память получаетль, источник, размер
+		// получаетль, источник, размер
 		memmove((void *)ph->p_va, binary + ph->p_offset, ph->p_filesz);
         // загрузка "особенных" областей, например bss
 		if (ph->p_memsz > ph->p_filesz)
@@ -310,9 +310,10 @@ load_icode(struct Env *e, uint8_t *binary, size_t size)
 	}
 	lcr3(boot_cr3);
 
-	// установка программного счетчика
+	// установка программного счетчика для текущего окружения
 	e->env_tf.tf_eip = elf->e_entry;
 
+	// создаем и отображаем одну страницу для программног стека
 	struct Page *stack_page;
 	int r = page_alloc(&stack_page);
 	if (r < 0)
@@ -457,6 +458,7 @@ env_run(struct Env *e)
 	e->env_runs++;
 	curenv = e;
 
+	// зачем переключаться на это же окружение?
 	if (rcr3() != e->env_cr3)
 		lcr3(e->env_cr3);
 
