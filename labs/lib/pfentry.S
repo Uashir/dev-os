@@ -65,15 +65,33 @@ _pgfault_upcall:
 	//
 	// LAB 4: Your code here.
 
+    addl $8, %esp // skip utf_fault_va && utf_err
+
+    movl %esp, %ebx
+    movl 40(%esp), %ecx // esp
+    movl 32(%esp), %edx // eip
+    movl %ecx, %esp
+
+    pushl %edx // push eip to return with 'ret'
+
+    // change esp in utf
+    movl %esp, %ecx
+    movl %ebx, %esp
+    movl %ecx, 40(%esp)
+
 	// Restore the trap-time registers.
 	// LAB 4: Your code here.
+    popal
+    addl $4, %esp // skip eip
 
 	// Restore eflags from the stack.
 	// LAB 4: Your code here.
+    popfl
 
 	// Switch back to the adjusted trap-time stack.
 	// LAB 4: Your code here.
+	popl %esp
 
 	// Return to re-execute the instruction that faulted.
 	// LAB 4: Your code here.
-
+    ret
