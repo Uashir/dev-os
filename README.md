@@ -7,4 +7,4 @@
 - ✅ [Лабораторная работа №5](https://github.com/Uashir/dev-os/tree/lab5)
 - ✅ [Лабораторная работа №6](https://github.com/Uashir/dev-os/tree/lab6)
 - ✅ [Лабораторная работа №7](https://github.com/Uashir/dev-os/tree/lab7)
-- 🤓 Лабораторная работа №8
+- ✅ [Лабораторная работа №8](https://github.com/Uashir/dev-os/tree/lab8)
