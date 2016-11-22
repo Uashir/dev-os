@@ -62,6 +62,7 @@
 
  TRAPHANDLER_NOEC(trap_handle_system_call, T_SYSCALL);
 
+TRAPHANDLER_NOEC(irq_entry_timer, IRQ_OFFSET);
 
 /*
  * Lab 3: Your code here for _alltraps

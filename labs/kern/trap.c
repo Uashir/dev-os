@@ -84,6 +84,8 @@ idt_init(void)
     extern void trap_handle_simd_floating_point_error();
     extern void trap_handle_system_call();
 
+	extern void irq_entry_timer();
+
     SETGATE(idt[T_DIVIDE], 0, GD_KT, trap_handle_divide_error, 0);
     SETGATE(idt[T_DEBUG], 0, GD_KT, trap_handle_debug_exception, 0);
     SETGATE(idt[T_NMI], 0, GD_KT, trap_handle_non_maskable_interrupt, 0);
@@ -103,6 +105,9 @@ idt_init(void)
     SETGATE(idt[T_MCHK], 0, GD_KT, trap_handle_machine_check, 0);
     SETGATE(idt[T_SIMDERR], 0, GD_KT, trap_handle_simd_floating_point_error, 0);
     SETGATE(idt[T_SYSCALL], 0, GD_KT, trap_handle_system_call, 3);
+
+	SETGATE(idt[IRQ_OFFSET], 0, GD_KT, irq_entry_timer, 0);
+
 	// Setup a TSS so that we get the right stack
 	// when we trap to the kernel.
 	ts.ts_esp0 = KSTACKTOP;
@@ -166,6 +171,9 @@ trap_dispatch(struct Trapframe *tf)
 
 	// Handle clock interrupts.
 	// LAB 4: Your code here.
+	if (tf->tf_trapno == IRQ_OFFSET) {
+		return sched_yield();
+	}
 
 	// Handle spurious interupts
 	// The hardware sometimes raises these because of noise on the
