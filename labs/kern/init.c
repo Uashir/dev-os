@@ -50,11 +50,15 @@ i386_init(void)
 	ENV_CREATE2(TEST, TESTSIZE)
 #else
 	// Touch all you want.
-//	ENV_CREATE(user_hello);
-//  ENV_CREATE(user_divzero);
-//	ENV_CREATE(user_softint);
-//	ENV_CREATE(user_badsegment);
-//	ENV_CREATE(user_primes);
+    
+    // LAB 5
+    
+    // Task 17 test. Creating two user/yield programms
+	// ENV_CREATE(user_yield);
+	// ENV_CREATE(user_yield);
+
+    // Task 17 test. Creating two user/yield programms
+	ENV_CREATE(user_dumbfork);
 #endif // TEST*
 
 
