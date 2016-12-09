@@ -4,7 +4,7 @@
 2. No need for ENV_RUNNING, because only one environment can run at any give point. This environment is located at curenv.
 3. Free environment list is used for simplifying environment's initilization/destruction procedures.
 4. Easier to control unique environmnet IDs, as shown in /inc/env.h. Dynamic list may cause IDs to overlap.
-5. In order (after kernel boot) ```
+5. In order (after kernel boot)
 	start (kern/entry.S);
 	i386_init (kern/init.c);
 	cons_init (kern/console.c);
@@ -15,7 +15,7 @@
 	idt_init (kern/trap.c);
 	env_create (kern/env.c);
 	env_run (kern/env.c);
-	env_pop_tf (kern/env.c); ```
+	env_pop_tf (kern/env.c);
 6. env_run function. cr3 register (pgdir kernel address), all segment registers (ss is important), and eip/esp for iret. 
 7. 0 is kernel, 3 is user. 1 and 2 are unused. By CPL part of SS register (lower 2 bits).
 8. Just zeroes it. memset((void*)(ph->p_va + ph->p_filesz), 0, ph->p_memsz - ph->p_filesz);
