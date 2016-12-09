@@ -23,6 +23,7 @@
 21. In page tables below UTOP (non-kernel references only).
 22. If a page present at page table was removed (only if the page tables being edited are the ones currently in use by the processor, which they currently always are).
 23. pmap.c (and GTD structure above)
+```
 struct Segdesc gdt[] =
 {
 	// 0x0 - unused (always faults -- for trapping NULL far pointers)
@@ -43,3 +44,4 @@ struct Segdesc gdt[] =
 	// 0x28 - tss, initialized in idt_init()
 	[GD_TSS >> 3] = SEG_NULL
 };
+```
