@@ -6,16 +6,27 @@
 4. Easier to control unique environmnet IDs, as shown in /inc/env.h. Dynamic list may cause IDs to overlap.
 5. In order (after kernel boot)
 	start (kern/entry.S);
+	
 	i386_init (kern/init.c);
+	
 	cons_init (kern/console.c);
+	
 	i386_detect_memory (kern/pmap.c);
+	
 	i386_vm_init (kern/pmap.c);
+	
 	page_init (kern/pmap.c);
+	
 	env_init (kern/env.c);
+	
 	idt_init (kern/trap.c);
+	
 	env_create (kern/env.c);
+	
 	env_run (kern/env.c);
+	
 	env_pop_tf (kern/env.c);
+	
 6. env_run function. cr3 register (pgdir kernel address), all segment registers (ss is important), and eip/esp for iret. 
 7. 0 is kernel, 3 is user. 1 and 2 are unused. By CPL part of SS register (lower 2 bits).
 8. Just zeroes it. memset((void*)(ph->p_va + ph->p_filesz), 0, ph->p_memsz - ph->p_filesz);
