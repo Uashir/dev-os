@@ -49,12 +49,11 @@ i386_init(void)
 	// Don't touch -- used by grading script!
 	ENV_CREATE2(TEST, TESTSIZE)
 #else
-	// Touch all you want.
-//	ENV_CREATE(user_hello);
-//  ENV_CREATE(user_divzero);
-//	ENV_CREATE(user_softint);
-//	ENV_CREATE(user_badsegment);
-//	ENV_CREATE(user_primes);
+     /*Touch all you want.*/
+    /*ENV_CREATE(user_spin);*/
+    /*ENV_CREATE(user_pingpong);*/
+    /*ENV_CREATE(user_primes);*/
+    ENV_CREATE(user_test);
 #endif // TEST*
 
 
