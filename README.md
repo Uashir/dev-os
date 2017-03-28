@@ -12,4 +12,4 @@
 10.	Only major difference is that in round-robin scheduler newest tasks are put into the end, but in our implementation they might be placed anywhere (relatively to start).
 11.	Two: env[0] is the lowest, all others are highest.
 12.	Into env during trap function execution (entire Trapframe is copied). They are restored during env_pop_tf function execution
-13.	Timer is reset before process gets the processor time (EOI is sent during processor-side interrupt handling), so no.
+13.	Yes, it does, however timer is reset before process gets the processor time (EOI is sent during processor-side interrupt handling).
