@@ -1,4 +1,10 @@
-# Лабораторные работы по операционным системам
+# Лабораторные работы по проектированию операционных систем
+
+Базируются на курсе MIT по разработке учебной операционной системы JOS (в честь Joshua Cates).
+
+[Методоческое пособие](http://kelarev.com/osd/os-dev-jos.pdf) на русском языке. Дополнительную информацию можно [тут](http://read.seas.harvard.edu/~kohler/class/06f-aos/index.html).
+
+Запуск операционной системы выполняется через эмулятор Bochs. [Инструкция по установке](http://dev.iu7.bmstu.ru/trac/corporate_docs/wiki/InstallBochs).
 
 - ✅ [Лабораторная работа №1](https://github.com/Uashir/dev-os/tree/lab1)
 - ✅ [Лабораторная работа №2](https://github.com/Uashir/dev-os/tree/lab2)
