@@ -1,6 +1,6 @@
 # Ответы на вопросы для ЛР №6
 
-1.	32. That means all IRQs are located right after reserved exceptions 0-31, and after 16 IRQs (32-47) goes syscall at 48.
+1.	It is 32. That means all IRQs are located right after reserved exceptions 0-31, and after 16 IRQs (32-47) goes syscall at 48.
 2.	Through setting FL_IF bit in environment's eflags (env->env_tf->tf_eflags). Through setting all gates as interrupt gates (automatic FL_IF clearing), since exceptions/syscalls/interrupts are the only times we switch to kernel mode.
 3.	The function of the 8259 PIC is to manage hardware interrupts and send them to the appropriate system interrupt. This allows the system to respond to devices needs without loss of time (from polling the device, for instance).
 4.	IRQ 2, since second pin of PIC is used to receive signal from second PIC (cascade interrupt IRQ 9 -> IRQ 2).
