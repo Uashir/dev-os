@@ -17,16 +17,18 @@
 15. Environment could become corrupted during single or nested interruptions.
 16. ebp register was changed during c function calls, so we need to zero it again.
 17. Via syscall interrupt:
-		asm volatile("int %1\n"
-		: "=a" (ret)
-		: "i" (T_SYSCALL),
-		  "a" (num),
-		  "d" (a1),
-		  "c" (a2),
-		  "b" (a3),
-		  "D" (a4),
-		  "S" (a5)
-		: "cc", "memory");
+    ```
+    	asm volatile("int %1\n"
+    	: "=a" (ret)
+    	: "i" (T_SYSCALL),
+    	  "a" (num),
+    	  "d" (a1),
+    	  "c" (a2),
+    	  "b" (a3),
+    	  "D" (a4),
+    	  "S" (a5)
+    	: "cc", "memory");
+    ```
 18. Five - edx, ecx, ebx, edi, esi (eax is used as syscallno and return value).
 19. Save the value of ebp - needed for called function sequence.
 20. On some architectures (i386), yes, eax is mandatory. No, number just needs to be higher than 31.
